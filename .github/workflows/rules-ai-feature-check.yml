@@ -18,7 +18,7 @@ jobs:
           import re
           from pathlib import Path
           data=Path("docs/index.html").read_text()
-          scripts=re.findall(r"<script>([\\s\\S]*?)</script>",data)
+          scripts=[data.split('<script>')[-1].split('</script>')[0]]
           assert scripts
           Path("/tmp/bigtwo-rules-browser.js").write_text(scripts[-1])
           PY
