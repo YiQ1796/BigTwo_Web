@@ -1,0 +1,29 @@
+name: Big Two Rules & AI feature checks
+on:
+  push:
+    branches:
+      - feature/bigtwo-rules-ai-v052
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify JavaScript
+        run: |
+          node --check docs/ai-strategy.js
+          node --check docs/card-assets.js
+          python3 - <<'PY'
+          import re
+          from pathlib import Path
+          data=Path("docs/index.html").read_text()
+          scripts=re.findall(r"<script>([\\s\\S]*?)</script>",data)
+          assert scripts
+          Path("/tmp/bigtwo-rules-browser.js").write_text(scripts[-1])
+          PY
+          node --check /tmp/bigtwo-rules-browser.js
+      - name: Validate rules, AI and previous UI
+        run: |
+          node tests/rules-ai-v052.test.cjs
+          node tests/ui-v051.test.cjs
