@@ -35,7 +35,7 @@ check("Iron is five-card type",()=>{assert.equal(iron.type,"four");assert.equal(
 check("Pair 2 is two-card type",()=>{assert.equal(pair2.type,"pair");assert.equal(pair2.size,2)});
 check("Iron beats pair of 2",()=>assert.equal(T.compare(iron,pair2),true));
 check("Pair 2 cannot beat iron",()=>assert.equal(T.compare(pair2,iron),false));
-check("Iron cannot beat pair of A",()=>assert.equal(T.compare(iron,T.classify(["AC","AD"])),false));
+check("Iron can beat pair of A",()=>assert.equal(T.compare(iron,T.classify(["AC","AD"])),true));
 check("Iron cannot beat single 2",()=>assert.equal(T.compare(iron,T.classify(["2S"])),false));
 check("Straight cannot beat pair of 2",()=>assert.equal(T.compare(T.classify(["3C","4D","5H","6S","7C"]),pair2),false));
 check("AI finds the legal iron reply",()=>assert(T.options(["7C","7D","7H","7S","3C"]).some(x=>T.compare(x.pattern,pair2))));

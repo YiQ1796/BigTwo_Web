@@ -1,0 +1,21 @@
+name: Big Two V0.5.4 iron-and-taunt regression
+on:
+  push:
+    branches:
+      - feature/bigtwo-v054-iron-pairs-taunts
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify game JavaScript
+        run: |
+          python3 -c "from pathlib import Path; import re; t=Path('docs/index.html').read_text(); v=re.findall(r'<script>([\s\S]*?)</script>',t); assert v; Path('/tmp/bigtwo-inline.js').write_text(v[-1])"
+          node --check /tmp/bigtwo-inline.js
+          node --check docs/ai-strategy.js
+          node tests/ui-v051.test.cjs
+          node tests/rules-ai-v052.test.cjs
+          node tests/rules-room-taunt-v053.test.cjs
+          node tests/iron-taunts-v054.test.cjs

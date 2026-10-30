@@ -30,6 +30,7 @@ jobs:
           node tests/ui-v051.test.cjs
           node tests/rules-ai-v052.test.cjs
           node tests/rules-room-taunt-v053.test.cjs
+          node tests/iron-taunts-v054.test.cjs
       - name: Configure Pages
         uses: actions/configure-pages@v5
       - name: Upload site
