@@ -1,0 +1,38 @@
+name: Deploy Big Two to GitHub Pages
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: big-two-pages
+  cancel-in-progress: true
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Check website files
+        shell: bash
+        run: |
+          test -s docs/index.html
+          test -s docs/card-assets.js
+          python3 -c "from pathlib import Path; import re; text=Path('docs/index.html').read_text(); scripts=re.findall(r'<script>([\s\S]*?)</script>', text); assert scripts; Path('/tmp/bigtwo-inline.js').write_text(scripts[-1])"
+          node --check /tmp/bigtwo-inline.js
+          node --check docs/card-assets.js
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+      - name: Upload site
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: ./docs
+      - name: Publish Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
