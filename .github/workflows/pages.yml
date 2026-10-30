@@ -27,6 +27,7 @@ jobs:
           python3 -c "from pathlib import Path; import re; text=Path('docs/index.html').read_text(); scripts=re.findall(r'<script>([\s\S]*?)</script>', text); assert scripts; Path('/tmp/bigtwo-inline.js').write_text(scripts[-1])"
           node --check /tmp/bigtwo-inline.js
           node --check docs/card-assets.js
+          node tests/ui-v051.test.cjs
       - name: Configure Pages
         uses: actions/configure-pages@v5
       - name: Upload site
