@@ -6,7 +6,7 @@ const {webcrypto}=require("node:crypto");
 const html=fs.readFileSync("docs/index.html","utf8");
 const aiCode=fs.readFileSync("docs/ai-strategy.js","utf8");
 const sandbox={window:{addEventListener:(name,fn)=>{if(name==="DOMContentLoaded")sandbox.ready=fn},BIG_TWO_CARD_IMAGES:{}},
- crypto:webcrypto,document:{getElementById:()=>({style:{},classList:{add(){},remove(){},toggle(){}},setAttribute(){}})},
+ crypto:webcrypto,document:{addEventListener(){},getElementById:()=>({style:{},classList:{add(){},remove(){},toggle(){}},setAttribute(){}})},
  localStorage:{getItem:()=>null,setItem(){},removeItem(){}},URLSearchParams,location:{search:"",pathname:"/"},console,setTimeout,clearTimeout};
 vm.runInNewContext(aiCode,sandbox);
 assert.equal(typeof sandbox.window.BigTwoAiStrategy.chooseMove,"function");
