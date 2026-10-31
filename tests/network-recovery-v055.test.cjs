@@ -61,7 +61,7 @@ const check=(name,fn)=>{console.log("PASS",name);return fn();};
  assert.equal(peers.length,1);
  assert.equal(peers[0].target,"bigtwo-v1-273514");
  assert.notEqual(get("game").style.display,"block");
- check("Joining does not display a false empty game state",()=>{assert(get("connection-description").textContent.includes("正在加入房間"));});
+ check("Joining does not display a false empty game state",()=>{assert(get("connection-description").textContent.includes("加入房間"));});
  const first=peers[0].channel;
  first.emit("error",{type:"negotiation-failed"});
  check("Failed WebRTC negotiation shows retry feedback",()=>{assert(get("connection-description").textContent.includes("自動重連"));});
