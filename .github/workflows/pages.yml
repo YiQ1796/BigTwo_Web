@@ -19,6 +19,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Apply V0.5.7 rules patch
+        shell: bash
+        run: python3 scripts/patch-v057-rules.py
       - name: Check website files
         shell: bash
         run: |
@@ -29,6 +32,7 @@ jobs:
           node --check docs/card-assets.js
           node tests/ui-v051.test.cjs
           node tests/rules-ai-v052.test.cjs
+          node tests/rules-ai-v057.test.cjs
           node tests/rules-room-taunt-v053.test.cjs
           node tests/iron-taunts-v054.test.cjs
           node tests/network-recovery-v055.test.cjs
