@@ -54,11 +54,11 @@ test("game engine permits four-of-a-kind over a single",()=>{
 
 test("three passes reset trick and return unrestricted lead",()=>{
  const g=r.newRoom("123456","QA","token");
- g.players=[{name:"A",hand:["4C","5C","6C","7C","8C","9C"],ai:false},{name:"B",hand:["10C"],ai:false},{name:"C",hand:["JC"],ai:false},{name:"D",hand:["QC"],ai:false}];
+ g.players=[{name:"A",hand:["4C","5D","6H","7S","8C","9C"],ai:false},{name:"B",hand:["10C"],ai:false},{name:"C",hand:["JC"],ai:false},{name:"D",hand:["QC"],ai:false}];
  g.phase="playing";g.turn=1;g.first=false;g.lastSeat=0;g.trick={cards:["2S"],pattern:r.classify(["2S"]),player:0};
  r.setGame(g);r.pass(1);r.pass(2);r.pass(3);
  assert.equal(g.turn,0);assert.equal(g.trick,null);assert.equal(g.passes,0);
- r.play(0,["4C","5C","6C","7C","8C"]);
+ r.play(0,["4C","5D","6H","7S","8C"]);
  assert.equal(g.trick.pattern.type,"straight");
 });
 // A single shuffled 52-card deck must produce four disjoint, equally sized hands.
