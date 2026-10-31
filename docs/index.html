@@ -67,7 +67,7 @@ function startRound(){
  ensureGame();while(game.players.length<4)game.players.push({name:"電腦 "+game.players.length,ai:true,token:null,hand:[]});
  const d=shuffle(deck());game.players.forEach((p,i)=>p.hand=sorted(d.slice(i*13,i*13+13)));
  game.phase="playing";game.playedCards=[];game.playedHands=[];game.taunt=null;game.tauntLastAt={};game.round++;game.first=game.round===1;game.trick=null;game.lastSeat=-1;game.passes=0;game.champion=null;
- if(game.first){game.turn=game.players.findIndex(p=>p.hand.includes("3C"));}else game.turn=game.winnerSeat||0;
+ if(game.first){game.turn=game.players.findIndex(p=>p.hand.includes("3C"));if(game.turn<0)throw Error("發牌資料異常：找不到梅花 3");}else{if(!Number.isInteger(game.winnerSeat)||game.winnerSeat<0||game.winnerSeat>=game.players.length)throw Error("上一局贏家資料遺失，無法決定先手");game.turn=game.winnerSeat;}
  log("第 "+game.round+" 局開始。");const winner=game.players.findIndex(p=>dragon(p.hand));if(winner>=0){game.phase="finished";game.champion=winner;game.winnerSeat=winner;log(game.players[winner].name+" 一條龍！直接獲勝");}
  broadcast();runAi();
 }
