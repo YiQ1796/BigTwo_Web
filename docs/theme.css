@@ -1,4 +1,4 @@
-/* Big Two — Monkey Royal Deck v0.5.4
+/* Big Two — Monkey Royal Deck v0.5.5
    Original deck artwork supplied by the user; CSS contains no generated artwork.
    A single unified theme replaces the v0.4 inline styling. */
 :root{--bg:#101e1b;--ink:#fff5de;--muted:#b7c8bd;--forest:#183c32;--forest2:#245a45;--gold:#e6bb6c;--gold2:#a77936;--cream:#fff8e9;--border:rgba(241,204,138,.36);--red:#dd4b54;--shadow:0 18px 46px rgba(0,0,0,.31)}
@@ -54,3 +54,9 @@
  .taunt-toolbar{display:flex;flex-wrap:nowrap;justify-content:flex-start;gap:6px;overflow-x:auto;overscroll-behavior-inline:contain;scroll-snap-type:x proximity;scrollbar-width:thin;max-width:100%;margin:5px auto 9px}
  .taunt-toolbar .taunt-button{flex:0 0 auto;white-space:nowrap;scroll-snap-align:start;min-height:34px;padding:6px 11px}
 }
+
+/* V0.5.5: distinguish joining/waiting from an active game; surface retries on mobile. */
+.connection-hint{max-width:1010px;margin:10px auto 14px;padding:12px 15px;border:1px solid #ba9964;border-radius:13px;display:flex;justify-content:space-between;align-items:center;gap:12px;background:linear-gradient(120deg,#24463c,#17382f);color:#f7e1b4;box-shadow:0 5px 16px #0004;font-size:14px;line-height:1.5}
+.connection-hint #connection-description{flex:1;min-width:0;overflow-wrap:anywhere}
+.connection-hint #retry-connect{flex:0 0 auto;white-space:nowrap;font-size:13px}
+@media(max-width:800px){.connection-hint{margin:7px 12px 11px;padding:9px 10px;font-size:12px;gap:7px}.connection-hint #retry-connect{padding:8px;font-size:12px}}
