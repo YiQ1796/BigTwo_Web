@@ -5,10 +5,11 @@
 <meta name="theme-color" content="#153b2f"><title>大老二 Big Two｜好友對戰</title>
 <script defer src="./card-assets.js"></script>
 <script defer src="./ai-strategy.js?v=052"></script>
+<script defer src="./relay-transport.js?v=056"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/peerjs@1.5.5/dist/peerjs.min.js" integrity="sha512-XEKeWX+mI3Ov+tg2evDlVQFzVOIp4T8J3cNcCEPaEUGpxJV3eZaN8rHuvnFPvQpGJBHPmrozJDMpm2xcDvtmyQ==" crossorigin="anonymous"></script>
-<link rel="stylesheet" href="./theme.css?v=055">
+<link rel="stylesheet" href="./theme.css?v=056">
 </head><body><div class="shell">
-<header class="bar"><div><h1>♠ 大老二 <small>BIG TWO</small></h1><small>猴王金典牌組 · 好友連線 · v0.5.5</small></div><div id="net" class="tag">尚未連線</div></header>
+<header class="bar"><div><h1>♠ 大老二 <small>BIG TWO</small></h1><small>猴王金典牌組 · 好友連線 · v0.5.6</small></div><div id="net" class="tag">尚未連線</div></header>
 <div id="connection-hint" class="connection-hint hidden" role="status" aria-live="polite"><span id="connection-description"></span><button type="button" id="retry-connect" class="button sub">重新連線</button></div>
 <section id="lobby" class="panel"><div class="lobby-showcase"><img src="./assets/cards/KS.webp" alt="猴王金典撲克牌" width="75" height="105"><div><strong>猴王金典 · 大老二</strong><small>52 張正式撲克牌已套用，好友連線、AI 補位，手機與電腦都能玩。</small></div></div><h2>建立房間或加入好友</h2><p>固定四人，房主開始後不足的座位自動補 AI。房主必須保持頁面開啟。</p><label>你的暱稱<input id="nick" maxlength="16" placeholder="輸入暱稱" autocomplete="nickname"></label><button class="button" id="create">建立新房間</button><hr style="margin:22px 0;border-color:#4b7768"><label>六位數字房號<input id="code" maxlength="6" inputmode="numeric" autocomplete="off" placeholder="例如 268519"></label><button class="button alt" id="join">加入好友房間</button><p class="legend">使用瀏覽器 P2P 連線。部分公司網路或特殊 NAT 可能無法直連。</p></section>
 <section id="game"><div class="actions"><span>房號 <b class="room" id="room">------</b></span><button id="share" class="button sub">複製邀請網址</button><span id="round" class="badge">等待開局</span><button id="stats-open" class="button sub stats-mobile-toggle" type="button" aria-controls="stats-panel" aria-expanded="false">出牌統計</button><button id="leave" class="button sub">返回大廳</button></div><p id="notice" class="notice"></p><div class="table-layout"><div class="play-column"><div class="table"><div class="seat top" id="seat1"></div><div class="seat left" id="seat2"></div><div class="seat right" id="seat3"></div><div id="taunt-bubble" class="taunt-bubble hidden" role="status" aria-live="polite"></div><div class="pile-wrap"><div id="pile-count" class="pile-caption">已出牌將堆疊於此</div><div id="table-pile" class="table-pile" aria-label="本局已出牌堆疊"></div></div><div class="middle"><div id="turn">等待玩家</div><div id="trick" class="trick"></div><div id="last" class="tabletext"></div></div></div><div class="handinfo" id="me">你的手牌</div><div class="hand" id="hand"></div><div class="actions"><button class="button sub" id="clear">取消選牌</button><button class="button alt" id="pass">PASS</button><button class="button" id="play">出牌</button><button class="button" id="start" style="display:none">開始遊戲（AI 補位）</button></div><div class="taunt-toolbar" role="group" aria-label="對局嘲諷快捷按鈕"><button type="button" id="taunt-1" class="taunt-button">🐒 猴王駕到</button><button type="button" id="taunt-2" class="taunt-button">😏 這手敢接？</button><button type="button" id="taunt-3" class="taunt-button">🃏 輪到你囉</button><button type="button" id="taunt-4" class="taunt-button">😂 別緊張</button><button type="button" id="taunt-5" class="taunt-button">⌛ 是要等多久？</button><button type="button" id="taunt-6" class="taunt-button">📣 要出牌了！</button><button type="button" id="taunt-7" class="taunt-button">👴 等到我都老三歲</button><button type="button" id="taunt-8" class="taunt-button">🐢 你的牌在散步？</button><button type="button" id="taunt-9" class="taunt-button">😴 我都快睡著了</button><button type="button" id="taunt-10" class="taunt-button">🤭 這手還要想？</button><button type="button" id="taunt-11" class="taunt-button">🔥 快點，我要贏了</button><button type="button" id="taunt-12" class="taunt-button">🙈 別再 PASS 啦</button></div></div><div class="sidebar">
@@ -25,7 +26,7 @@ window.addEventListener("DOMContentLoaded",function(){
 const R=["3","4","5","6","7","8","9","10","J","Q","K","A","2"],S=["C","D","H","S"],SYM={C:"♣",D:"♦",H:"♥",S:"♠"},NAMES={single:"單張",pair:"對子",straight:"順子",full:"葫蘆",four:"鐵支",sf:"同花順"},LEVEL={straight:1,full:2,four:3,sf:4};
 const $=id=>document.getElementById(id);
 let host=false,game=null,seat=0,peer=null,conn=null,peers=new Map(),selected=new Set(),resumeKey="bigtwo-online-v04",resuming=false,thinking=false,tauntTimer=null,lastTauntSentAt=0;
-let guestAttemptId=0,guestAttemptFailed=0,guestRetryCount=0,guestRetryTimer=null,guestHandshakeTimer=null,guestHasState=false,hostReconnectTimer=null,hostAttemptId=0;
+let guestAttemptId=0,guestAttemptFailed=0,guestRetryCount=0,guestRetryTimer=null,guestHandshakeTimer=null,guestHasState=false,hostReconnectTimer=null,hostAttemptId=0,hostRelay=null,guestRelay=null;
 const TAUNT_TEXT=Object.freeze({"1":"🐒 猴王駕到！","2":"😏 這手你敢接？","3":"🃏 輪到你囉！","4":"😂 別緊張啦！","5":"⌛ 是要等多久？","6":"📣 要出牌了！","7":"👴 等到我都老三歲了！","8":"🐢 你的牌在散步嗎？","9":"😴 我都快睡著了！","10":"🤭 這手還要想多久？","11":"🔥 快點，我要贏了！","12":"🙈 別再 PASS 啦！"});
 const TAUNT_COOLDOWN_MS=6000;
 const state={room:"",token:"",name:""};
@@ -154,6 +155,8 @@ function cancelGuestTimers(){
 function closeGuestTransport(){
  const oldConn=conn;conn=null;
  const oldPeer=peer;peer=null;
+ const oldRelay=guestRelay;guestRelay=null;
+ try{oldRelay?.close();}catch{}
  try{if(oldConn&&!oldConn.open)oldConn.close();else oldConn?.close();}catch{}
  try{if(oldPeer&&!oldPeer.destroyed)oldPeer.destroy();}catch{}
 }
@@ -178,6 +181,15 @@ function failGuestAttempt(attempt,reason){
  connectionHint(detail+"，"+Math.ceil(delay/1000)+" 秒後自動重連（第 "+guestRetryCount+"/6 次）。",true);
  guestRetryTimer=setTimeout(()=>startGuestConnection(),delay);
 }
+
+function receiveGuestSnapshot(attempt,st,channel){
+ if(attempt!==guestAttemptId||guestAttemptFailed===attempt)return;
+ if(!st||st.room!==state.room||!Number.isInteger(st.me))return;
+ cancelGuestTimers();guestHasState=true;guestRetryCount=0;
+ seat=st.me;store();showGame();
+ $("net").textContent=channel==="relay"?"已透過 WSS 中繼連線":"已連線到房主（P2P）";
+ connectionHint("");render(st);
+}
 async function startGuestConnection(){
  if(host||!state.room)return;
  cancelGuestTimers();
@@ -185,7 +197,24 @@ async function startGuestConnection(){
  guestAttemptFailed=0;guestHasState=false;guestRetryCount++;
  closeGuestTransport();
  $("net").textContent="正在連線到房主";
- connectionHint("正在加入房間 "+state.room+"（第 "+guestRetryCount+"/6 次）…",true);
+ connectionHint("優先嘗試 WSS 加密中繼加入房間 "+state.room+"（第 "+guestRetryCount+"/6 次）…",true);
+ // Unlike ICE direct negotiation, encrypted WSS can work behind many restrictive NATs.
+ if(window.BigTwoRelay?.connectGuest){
+  try{
+   const relay=await window.BigTwoRelay.connectGuest(state.room,{
+    name:state.name,token:state.token,
+    onState:st=>receiveGuestSnapshot(attempt,st,"relay"),
+    onError:message=>msg(message),
+    onDisconnect:reason=>failGuestAttempt(attempt,reason),
+    onStatus:message=>{if(attempt===guestAttemptId&&!guestHasState)connectionHint(message,true);}
+   });
+   if(attempt!==guestAttemptId||host||guestAttemptFailed===attempt){relay.close();return;}
+   guestRelay=relay;conn=relay;return;
+  }catch(error){
+   if(attempt!==guestAttemptId||host||guestAttemptFailed===attempt)return;
+   connectionHint("WSS 中繼不可用，改用 P2P 連線：" + String(error?.message||"未知錯誤").slice(0,85),true);
+  }
+ }
  try{
   const created=await createPeer();
   if(attempt!==guestAttemptId||host){created.destroy();return;}
@@ -215,14 +244,7 @@ async function startGuestConnection(){
     connectionHint(String(data.message||"房主拒絕加入"),true);
     return;
    }
-   if(data.type!=="state")return;
-   const snapshotFromHost=data.state;
-   if(!snapshotFromHost||snapshotFromHost.room!==state.room||!Number.isInteger(snapshotFromHost.me))return;
-   cancelGuestTimers();guestHasState=true;guestRetryCount=0;
-   seat=snapshotFromHost.me;store();showGame();
-   $("net").textContent="已連線到房主";
-   connectionHint("");
-   render(snapshotFromHost);
+   if(data.type==="state")receiveGuestSnapshot(attempt,data.state,"peer");
   });
   channel.on("close",()=>failGuestAttempt(attempt,"與房主的連線已關閉"));
   channel.on("error",e=>failGuestAttempt(attempt,"連線協商失敗："+(e?.type||e?.message||"WebRTC")));
@@ -277,53 +299,54 @@ function incoming(c){c.on("data",data=>{try{
  }catch(e){try{c.send({type:"error",message:e.message});}catch{}}});
  c.on("close",()=>{if(Number.isInteger(c.seat)&&peers.get(c.seat)===c)peers.delete(c.seat);});}
 async function hostCreate(saved){
- cancelGuestRecovery();
- clearTimeout(hostReconnectTimer);
+ cancelGuestRecovery();clearTimeout(hostReconnectTimer);
  const attempt=++hostAttemptId;
  closeGuestTransport();
- host=true;
- if(saved){
-  game=saved.game;state.room=saved.room;state.token=saved.token;state.name=saved.name;
- }else{
+ try{hostRelay?.close();}catch{}
+ hostRelay=null;host=true;
+ if(saved){game=saved.game;state.room=saved.room;state.token=saved.token;state.name=saved.name;}
+ else{
   state.room=randomCode();state.token=randomToken();
   state.name=$("nick").value.trim().slice(0,16)||"房主";
   game=newRoom(state.room,state.name,state.token);
  }
  const currentGame=game;
  $("net").textContent="正在建立房間";
- connectionHint("正在將房間 "+state.room+" 登記到連線服務…");
- try{
+ connectionHint("正在啟動加密 WSS 中繼與 P2P，房主請保持遊戲頁面開啟…");
+ const attempts=[];
+ attempts.push((async()=>{
   const created=await createPeer("bigtwo-v1-"+state.room.toLowerCase());
-  if(attempt!==hostAttemptId||!host||game!==currentGame){created.destroy();return;}
-  peer=created;
-  created.on("connection",incoming);
+  if(attempt!==hostAttemptId||!host||game!==currentGame){created.destroy();throw Error("Stale host");}
+  peer=created;created.on("connection",incoming);
   created.on("disconnected",()=>{
    if(peer!==created||!host)return;
-   $("net").textContent="房主訊號中斷";
-   connectionHint("房主訊號中斷，正在恢復。已連線玩家可能仍可繼續遊玩。",true);
+   $("net").textContent=hostRelay?"房主 WSS 中繼在線":"房主訊號中斷";
+   if(!hostRelay)connectionHint("P2P 訊號中斷，正在恢復…",true);
    scheduleHostSignalReconnect(created);
   });
-  created.on("open",()=>{
+  created.on("open",()=>{if(peer!==created||!host)return;clearTimeout(hostReconnectTimer);});
+  created.on("error",e=>{
    if(peer!==created||!host)return;
-   clearTimeout(hostReconnectTimer);
-   $("net").textContent="房主連線中";
-   connectionHint("");
+   if(!hostRelay)connectionHint("P2P 訊號錯誤："+(e?.message||e?.type||"unknown"),true);
   });
-  created.on("error",error=>{
-   if(peer!==created||!host)return;
-   $("net").textContent="房主網路異常";
-   const taken=error?.type==="unavailable-id";
-   connectionHint(taken
-     ?"這個房號已被另一個房主占用，請確認沒有在另一個分頁開啟同房間；可以返回大廳建立新房間。"
-     :"房主訊號連線失敗："+(error?.message||"請重新連線"),true);
-  });
+  return "P2P";
+ })());
+ if(window.BigTwoRelay?.createHost)attempts.push((async()=>{
+  const relay=await window.BigTwoRelay.createHost(state.room,incoming,()=>{});
+  if(attempt!==hostAttemptId||!host||game!==currentGame){relay.close();throw Error("Stale host");}
+  hostRelay=relay;return "加密 WSS 中繼";
+ })());
+ try{
+  // Open the table as soon as either transport is available; keep the other running.
+  const chosen=await Promise.any(attempts);
+  if(attempt!==hostAttemptId||game!==currentGame)return;
   peers.clear();seat=0;showGame();broadcast();
-  $("net").textContent="房主連線中";connectionHint("");
- }catch(error){
+  $("net").textContent="房主連線中（"+chosen+"）";
+  connectionHint("");
+ }catch(err){
   if(attempt!==hostAttemptId)return;
-  $("net").textContent="建房尚未連線";
-  connectionHint("建立房間失敗："+(error?.message||"訊號服務不可用")+
-    "。請確認網路並按「重新連線」；若房號已占用，請返回大廳建立新房間。",true);
+  $("net").textContent="建房失敗";
+  connectionHint("WSS 中繼與 P2P 均無法連線，請確認網路後按「重新連線」。",true);
  }
 }
 function scheduleHostSignalReconnect(target){
@@ -347,7 +370,7 @@ function guestJoin(saved){
  startGuestConnection();
 }
 function showGame(){$("lobby").style.display="none";$("game").style.display="block";$("room").textContent=state.room;$("net").textContent=host?"房主連線中":"連線中";history.replaceState(null,"",location.pathname+"?room="+state.room);store();}
-function resetView(){cancelGuestRecovery();clearTimeout(hostReconnectTimer);hostAttemptId++;closeGuestTransport();if(tauntTimer)clearTimeout(tauntTimer);lastTauntSentAt=0;$("taunt-bubble").classList.add("hidden");$("taunt-bubble").dataset.signature="";$("game").style.display="none";$("lobby").style.display="block";history.replaceState(null,"",location.pathname);$("net").textContent="尚未連線";connectionHint("");host=false;game=null;selected.clear();localStorage.removeItem(resumeKey);}
+function resetView(){cancelGuestRecovery();clearTimeout(hostReconnectTimer);hostAttemptId++;try{hostRelay?.close();}catch{}hostRelay=null;closeGuestTransport();if(tauntTimer)clearTimeout(tauntTimer);lastTauntSentAt=0;$("taunt-bubble").classList.add("hidden");$("taunt-bubble").dataset.signature="";$("game").style.display="none";$("lobby").style.display="block";history.replaceState(null,"",location.pathname);$("net").textContent="尚未連線";connectionHint("");host=false;game=null;selected.clear();localStorage.removeItem(resumeKey);}
 function cardNode(id,interactive){const el=document.createElement(interactive?"button":"span");const s=id.slice(-1),r=id.slice(0,-1);el.className="card"+(s==="D"||s==="H"?" red":"")+(selected.has(id)&&interactive?" selected":"");if(interactive){el.type="button";el.setAttribute("aria-label",r+SYM[s]);el.onclick=()=>{selected.has(id)?selected.delete(id):selected.add(id);el.classList.toggle("selected",selected.has(id));$("play").textContent="出牌（"+selected.size+"）";};}
  const config=window.BIG_TWO_CARD_IMAGES||{};if(config[id]){const img=document.createElement("img");img.src=config[id];img.alt=r+SYM[s];img.onerror=()=>{el.replaceChildren();const txt=document.createElement("span");txt.textContent=r+SYM[s];el.append(txt);};el.append(img);}else{const n=document.createElement("span");n.textContent=r;const icon=document.createElement("strong");icon.textContent=SYM[s];el.append(n,icon);}return el;}
 
