@@ -57,7 +57,22 @@ if(a.type==="four"&&b.type==="pair")return true;
 if(a.size!==b.size)return false;if(a.size===5&&a.level!==b.level)return a.level>b.level;for(let i=0;i<a.key.length;i++){if(a.key[i]!==b.key[i])return a.key[i]>b.key[i];}return false;}
 function dragon(cards){return cards.length===13&&new Set(cards.map(rank)).size===13;}
 function deck(){return R.flatMap(r=>S.map(s=>r+s));}
-function shuffle(a){const rand=new Uint32Array(a.length);crypto.getRandomValues(rand);for(let i=a.length-1;i>0;i--){const j=rand[i]%(i+1);[a[i],a[j]]=[a[j],a[i]];}return a;}
+// Uniform bounded draw: rejection sampling prevents modulo bias.
+function randomIndex(exclusiveMax){
+ if(!Number.isInteger(exclusiveMax)||exclusiveMax<1||exclusiveMax>4294967296)throw Error("洗牌亂數範圍錯誤");
+ const range=4294967296,limit=Math.floor(range/exclusiveMax)*exclusiveMax;
+ const value=new Uint32Array(1);
+ do{crypto.getRandomValues(value);}while(value[0]>=limit);
+ return value[0]%exclusiveMax;
+}
+// Fisher-Yates shuffles all 52 cards before any seat receives its 13 cards.
+function shuffle(cards){
+ for(let i=cards.length-1;i>0;i--){
+  const j=randomIndex(i+1);
+  [cards[i],cards[j]]=[cards[j],cards[i]];
+ }
+ return cards;
+}
 function newRoom(code,name,token){return{room:code,players:[{name,token,ai:false,hand:[]}],phase:"lobby",round:0,first:true,turn:0,trick:null,lastSeat:-1,passes:0,champion:null,log:["房間已建立"],playedCards:[],playedHands:[],taunt:null,tauntLastAt:{}};}
 function log(s){game.log.unshift(s);game.log=game.log.slice(0,80);}
 function snapshot(n){return{room:game.room,phase:game.phase,round:game.round,first:game.first,turn:game.turn,trick:game.trick,lastSeat:game.lastSeat,champion:game.champion,me:n,hand:game.players[n]?.hand||[],players:game.players.map(p=>({name:p.name,ai:p.ai,count:p.hand.length})),playedCards:game.playedCards||[],playedHands:game.playedHands||[],taunt:game.taunt||null,log:game.log};}
@@ -66,8 +81,10 @@ function ensureGame(){if(!game||game.phase!=="lobby")throw Error("此房間無�
 function startRound(){
  ensureGame();while(game.players.length<4)game.players.push({name:"電腦 "+game.players.length,ai:true,token:null,hand:[]});
  const d=shuffle(deck());game.players.forEach((p,i)=>p.hand=sorted(d.slice(i*13,i*13+13)));
- game.phase="playing";game.playedCards=[];game.playedHands=[];game.taunt=null;game.tauntLastAt={};game.round++;game.first=game.round===1;game.trick=null;game.lastSeat=-1;game.passes=0;game.champion=null;
- if(game.first){game.turn=game.players.findIndex(p=>p.hand.includes("3C"));if(game.turn<0)throw Error("發牌資料異常：找不到梅花 3");}else{if(!Number.isInteger(game.winnerSeat)||game.winnerSeat<0||game.winnerSeat>=game.players.length)throw Error("上一局贏家資料遺失，無法決定先手");game.turn=game.winnerSeat;}
+ game.phase="playing";game.playedCards=[];game.playedHands=[];game.taunt=null;game.tauntLastAt={};game.round++;game.first=true;game.trick=null;game.lastSeat=-1;game.passes=0;game.champion=null;
+ // Every round is a new deal: the holder of the 3 of clubs always opens.
+ game.turn=game.players.findIndex(p=>p.hand.includes("3C"));
+ if(game.turn<0)throw Error("發牌資料異常：找不到梅花 3");
  log("第 "+game.round+" 局開始。");const winner=game.players.findIndex(p=>dragon(p.hand));if(winner>=0){game.phase="finished";game.champion=winner;game.winnerSeat=winner;log(game.players[winner].name+" 一條龍！直接獲勝");}
  broadcast();runAi();
 }
