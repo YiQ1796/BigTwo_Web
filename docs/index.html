@@ -324,7 +324,7 @@ async function hostCreate(saved){
    if(!hostRelay)connectionHint("P2P 訊號中斷，正在恢復…",true);
    scheduleHostSignalReconnect(created);
   });
-  created.on("open",()=>{if(peer!==created||!host)return;clearTimeout(hostReconnectTimer);});
+  created.on("open",()=>{if(peer!==created||!host)return;clearTimeout(hostReconnectTimer);$("net").textContent=hostRelay?"房主 WSS 中繼在線":"房主連線中（P2P）";connectionHint("");});
   created.on("error",e=>{
    if(peer!==created||!host)return;
    if(!hostRelay)connectionHint("P2P 訊號錯誤："+(e?.message||e?.type||"unknown"),true);
