@@ -82,7 +82,7 @@ async function main(){
  console.log("PASS encrypted join, private state and valid play round trip");
  console.log("PASS public broker has no plaintext tokens or cards");
  guest.close();host.close();
- assert(html.includes('src="./relay-transport.js?v=056"'));
+ assert(html.includes('src="./relay-transport.js?v=057"'));
  assert(html.includes("window.BigTwoRelay?.connectGuest"));
  assert(html.includes("Promise.any(attempts)"));
  assert(html.includes('hostRelay=relay;return "加密 WSS 中繼"'));
