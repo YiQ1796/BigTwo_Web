@@ -19,7 +19,7 @@ const sandbox={
 
 const inline=html.match(/<script>\s*("use strict";[\s\S]*?)<\/script>/)?.[1];
 assert(inline,"Embedded game script must exist");
-const inject='window.__testRules={classify,compare,play,pass,startRound,newRoom,setGame:g=>{game=g;host=false},getGame:()=>game};\n';
+const inject='window.__testRules={classify,compare,play,pass,startRound,newRoom,deck,shuffle,randomIndex,setGame:g=>{game=g;host=false},getGame:()=>game};\n';
 const transformed=inline.replace("const urlRoom=new URLSearchParams",inject+"const urlRoom=new URLSearchParams");
 vm.runInNewContext(transformed,sandbox);
 sandbox.ready();
@@ -61,12 +61,79 @@ test("three passes reset trick and return unrestricted lead",()=>{
  r.play(0,["4C","5C","6C","7C","8C"]);
  assert.equal(g.trick.pattern.type,"straight");
 });
-test("subsequent round starts with previous winner including seat zero",()=>{
- const g=r.newRoom("123456","QA","token");g.players=[{name:"A",hand:[],ai:false},{name:"B",hand:[],ai:false},{name:"C",hand:[],ai:false},{name:"D",hand:[],ai:false}];
- g.phase="lobby";g.round=1;g.winnerSeat=2;r.setGame(g);r.startRound();assert.equal(g.turn,2);
+// A single shuffled 52-card deck must produce four disjoint, equally sized hands.
+const makeRoom=()=>{
+ const g=r.newRoom("123456","QA","token");
+ g.players=[
+  {name:"Human",hand:[],ai:false},
+  {name:"CPU 1",hand:[],ai:true},
+  {name:"CPU 2",hand:[],ai:true},
+  {name:"CPU 3",hand:[],ai:true}
+ ];
+ return g;
+};
+test("deck has exactly 52 distinct cards",()=>{
+ const d=r.deck();
+ assert.equal(d.length,52);
+ assert.equal(new Set(d).size,52);
+ assert(d.includes("3C")&&d.includes("2S"));
 });
-test("missing previous winner is rejected rather than choosing seat zero",()=>{
- const g=r.newRoom("123456","QA","token");g.players=[{name:"A",hand:[],ai:false},{name:"B",hand:[],ai:false},{name:"C",hand:[],ai:false},{name:"D",hand:[],ai:false}];
- g.phase="lobby";g.round=1;delete g.winnerSeat;r.setGame(g);assert.throws(()=>r.startRound(),/上一局贏家資料遺失/);
+test("each round leads from its own three of clubs holder",()=>{
+ const g=makeRoom();r.setGame(g);
+ for(let round=1;round<=100;round++){
+  g.phase="lobby";
+  g.winnerSeat=(round+2)%4; // Previous winner must not control the next lead.
+  r.startRound();
+  assert.equal(g.round,round);
+  assert.equal(g.first,true);
+  assert.equal(g.turn,g.players.findIndex(p=>p.hand.includes("3C")));
+  assert.equal(g.players.filter(p=>p.hand.includes("3C")).length,1);
+ }
+});
+test("later rounds also require the first move to contain three of clubs",()=>{
+ const g=makeRoom();g.round=3;delete g.winnerSeat;r.setGame(g);r.startRound();
+ const leader=g.turn;
+ const otherCard=g.players[leader].hand.find(card=>card!=="3C");
+ assert(otherCard);
+ assert.throws(()=>r.play(leader,[otherCard]),/第一手牌必須包含梅花 3/);
+ r.play(leader,["3C"]);
+ assert.equal(g.first,false);
+ assert.equal(g.trick.player,leader);
+});
+test("shuffling cannot change card count or duplicate cards",()=>{
+ for(let round=0;round<200;round++){
+  const shuffled=r.shuffle(r.deck());
+  assert.equal(shuffled.length,52);
+  assert.equal(new Set(shuffled).size,52);
+ }
+});
+test("random deal gives every human or AI seat comparable high-card odds",()=>{
+ const g=makeRoom();r.setGame(g);
+ const draws=6000;
+ const samples={"3C":[0,0,0,0],"2S":[0,0,0,0],"AS":[0,0,0,0]};
+ const expectedDeck=new Set(r.deck());
+ for(let round=0;round<draws;round++){
+  g.phase="lobby";r.startRound();
+  const allCards=g.players.flatMap(player=>player.hand);
+  assert.equal(allCards.length,52);
+  assert.equal(new Set(allCards).size,52);
+  assert(allCards.every(card=>expectedDeck.has(card)));
+  g.players.forEach((player,seat)=>{
+   assert.equal(player.hand.length,13);
+   for(const card of Object.keys(samples)){
+    if(player.hand.includes(card))samples[card][seat]++;
+   }
+  });
+ }
+ // Every seat has expectation draws/4; wide tolerance avoids a flaky random test.
+ const expected=draws/4;
+ for(const [card,counts] of Object.entries(samples)){
+  assert.equal(counts.reduce((sum,n)=>sum+n,0),draws);
+  for(let seat=0;seat<4;seat++){
+   assert(Math.abs(counts[seat]-expected)<200,
+    card+" distribution unexpectedly uneven at seat "+seat+": "+counts.join(","));
+  }
+ }
+ console.log("FAIR-DEAL seat samples",JSON.stringify(samples));
 });
 console.log("PASS all V0.5.7 rules and lead scenarios");
