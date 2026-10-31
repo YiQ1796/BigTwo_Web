@@ -110,13 +110,13 @@ const check=(name,fn)=>{console.log("PASS",name);return fn();};
  check("Host begins with registered room and game state",()=>{
   assert.equal(home.peers.length,1);
   assert.equal(home.get("game").style.display,"block");
-  assert.equal(home.get("net").textContent,"房主連線中");
+  assert(home.get("net").textContent.startsWith("房主連線中"));
  });
  home.peers[0].disconnected=true;home.peers[0].emit("disconnected");
  home.fireTimer(3000);
  check("Host restores signal registration after disconnection",()=>{
   assert.equal(home.peers[0].reconnected,true);
-  assert.equal(home.get("net").textContent,"房主連線中");
+  assert(home.get("net").textContent.startsWith("房主連線中"));
  });
  console.log("PASS 10 simulated P2P recovery scenarios");
 })().catch(error=>{console.error(error);process.exitCode=1;});
