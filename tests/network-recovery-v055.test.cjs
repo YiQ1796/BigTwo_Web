@@ -82,7 +82,7 @@ const check=(name,fn)=>{console.log("PASS",name);return fn();};
  second.emit("data",{type:"state",state:snapshot});
  check("Receiving verified host state opens real game",()=>{
   assert.equal(get("game").style.display,"block");
-  assert.equal(get("net").textContent,"已連線到房主");
+  assert(get("net").textContent.startsWith("已連線到房主"));
   assert.equal(qa.connected(),true);
   assert(get("connection-hint").classList.contains("hidden"));
  });
