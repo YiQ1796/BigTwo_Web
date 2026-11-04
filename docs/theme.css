@@ -60,3 +60,57 @@
 .connection-hint #connection-description{flex:1;min-width:0;overflow-wrap:anywhere}
 .connection-hint #retry-connect{flex:0 0 auto;white-space:nowrap;font-size:13px}
 @media(max-width:800px){.connection-hint{margin:7px 12px 11px;padding:9px 10px;font-size:12px;gap:7px}.connection-hint #retry-connect{padding:8px;font-size:12px}}
+
+
+/* V0.5.8 — clear invitation-only waiting room and explicit session choice. */
+.waiting-room{width:min(1050px,100%);margin:13px auto 24px;padding:20px;background:linear-gradient(155deg,#305743 0%,#163d32 55%,#163228 100%);border:2px solid #e0b86c;border-radius:22px;box-shadow:0 15px 40px #0007,inset 0 0 0 1px #ffe3a322;position:relative;overflow:hidden}
+.waiting-room:before{content:'♠';position:absolute;right:-12px;top:-90px;font-size:320px;opacity:.06;pointer-events:none}
+#game.waiting-room-active .table-layout{display:none}
+#game.waiting-room-active .stats-mobile-toggle{display:none}
+.waiting-hero{position:relative;text-align:center;padding:9px 7px 18px}
+.waiting-eyebrow{display:inline-flex;align-items:center;gap:9px;color:#ffdb91;font-weight:900;font-size:12px;letter-spacing:2px;padding:7px 15px;border-radius:24px;border:1px solid #e0b76d88;background:#0d2f25c9}
+.waiting-dot{display:inline-block;width:10px;height:10px;border-radius:50%;background:#91f4b0;box-shadow:0 0 0 5px #71d29430,0 0 14px #81f4a3}
+.waiting-hero h2{margin:12px 0 2px;color:#ffe5aa;font-size:clamp(25px,4vw,40px);font-weight:900;letter-spacing:2px;text-shadow:0 3px 7px #0008}
+.waiting-hero p{margin:6px auto 14px;color:#e6efde;max-width:610px}
+.waiting-count{color:#fff5d8;font-size:20px;font-weight:900;letter-spacing:.5px}
+.waiting-progress{background:#091f18;border:1px solid #77967d66;border-radius:10px;height:10px;max-width:370px;margin:10px auto 0;overflow:hidden}
+.waiting-progress>div{background:linear-gradient(90deg,#f2b85e,#fff1b6);height:100%;width:25%;border-radius:10px;transition:width .2s}
+.waiting-slots{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px;position:relative}
+.waiting-slot{display:flex;align-items:center;gap:17px;min-height:103px;padding:16px 18px;border:1px solid #f4d49a77;border-radius:16px;background:linear-gradient(130deg,#315c47e8,#173c30f2);box-shadow:inset 0 1px 0 #ffffff12,0 6px 19px #0004;min-width:0}
+.waiting-slot.slot-empty{background:#0d2c25bf;border-style:dashed;border-color:#b8bc9680}
+.waiting-slot.slot-offline{border-color:#d98278a8;background:#44382dd9}
+.slot-avatar{width:55px;height:55px;flex:0 0 55px;display:grid;place-items:center;background:linear-gradient(135deg,#f8e2b0,#bc884e);color:#2c3a2f;border:2px solid #ffedc5;border-radius:50%;font-size:28px;font-weight:900;box-shadow:0 4px 11px #0006}
+.slot-empty .slot-avatar{background:#204637;border-color:#678873;color:#c7d1c3;box-shadow:none}
+.slot-detail{min-width:0;display:flex;flex-direction:column;gap:3px;overflow-wrap:anywhere}
+.slot-label{font-size:12px;color:#cfca9b;letter-spacing:.6px;font-weight:700}
+.slot-name{font-size:clamp(16px,2.1vw,23px);color:#fff8e5;line-height:1.2}
+.slot-status{font-size:13px;color:#a7f1bb;font-weight:700}
+.slot-empty .slot-status{color:#c6ccb7;font-weight:500}
+.slot-offline .slot-status{color:#ffb2a6}
+.waiting-bottom{margin-top:17px;padding:17px 8px 2px;border-top:1px solid #f4ce8560;text-align:center;position:relative}
+.waiting-bottom p{color:#f7e1b6;font-weight:600;margin:0 0 13px}
+.waiting-commands{display:flex;justify-content:center;gap:13px;flex-wrap:wrap}
+.waiting-commands .button{min-width:205px}
+.resume-choice{text-align:center;padding:13px 7px 4px}
+.resume-kicker{color:#e6c280;font-weight:900;letter-spacing:2px;font-size:13px}
+.resume-choice h2{color:#fff0ba;font-size:clamp(24px,4vw,32px);margin:10px 0}
+.resume-choice p{background:#0d2c2594;border:1px solid #b9a26b6b;border-radius:12px;color:#fff0d1;padding:16px;margin:14px auto}
+.resume-buttons{display:flex;flex-wrap:wrap;gap:12px;margin:20px auto;justify-content:center}
+.resume-buttons .button{min-width:195px;font-size:16px}
+.resume-choice small{display:block;color:#d3d7c6;font-size:12px;line-height:1.65}
+@media(max-width:700px){
+ .waiting-room{padding:13px;border-radius:15px;margin:9px auto}
+ .waiting-slots{gap:8px}
+ .waiting-slot{padding:10px;gap:9px;min-height:85px}
+ .slot-avatar{width:39px;height:39px;flex-basis:39px;font-size:21px}
+ .slot-label{font-size:11px}.slot-name{font-size:16px}.slot-status{font-size:11px}
+ .waiting-hero{padding-bottom:12px}.waiting-hero h2{font-size:25px}
+ .waiting-count{font-size:16px}
+ .waiting-commands .button{min-width:0;flex:1}
+}
+@media(max-width:450px){
+ .waiting-slots{grid-template-columns:1fr}
+ .waiting-slot{min-height:70px;padding:9px 14px}
+ .waiting-hero p{font-size:12px}
+ .resume-buttons .button{min-width:0;width:100%}
+}
