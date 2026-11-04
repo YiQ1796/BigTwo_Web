@@ -42,7 +42,7 @@ function harness({saved=null,invite=""}={}){
  };
  const script=html.match(/<script>\s*("use strict";[\s\S]*?)<\/script>/)?.[1];
  assert(script,"Embedded game script should exist");
- const hook='window.__ux={newRoom,render,snapshot,canResume,setGame:g=>{game=g;host=false},setHost:value=>{host=value},getGame:()=>game};\n';
+ const hook='window.__ux={newRoom,render,snapshot,canResume,state,setGame:g=>{game=g;host=false},setHost:value=>{host=value},getGame:()=>game};\n';
  const injected=script.replace("const urlRoom=new URLSearchParams",hook+"const urlRoom=new URLSearchParams");
  assert.notEqual(script,injected,"Test injection point missing");
  vm.runInNewContext(injected,sandbox,{timeout:1500});
@@ -58,6 +58,8 @@ const previous={room:"123456",name:"Host",token:"a".repeat(36),host:true,game:{r
  assert(h.get("resume-summary").textContent.includes("123456"));
  h.get("resume-new").click();
  assert.equal(h.storage.has("bigtwo-online-v04"),false,"Restart must discard saved credentials and game");
+ assert.equal(h.qa.state.room,"","Restart must clear old room identity");
+ assert.equal(h.qa.state.token,"","Restart must clear old join credential");
  assert(h.get("resume-choice").classList.contains("hidden"),"Restore choice should close");
  assert(!h.get("entry-form").classList.contains("hidden"),"New game form should appear");
  assert.equal(h.getPeerCount(),0,"Restart must not reconnect old game");
