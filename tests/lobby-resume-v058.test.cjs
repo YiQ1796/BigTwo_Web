@@ -25,7 +25,7 @@ function harness({saved=null,invite=""}={}){
    click(){this.onclick?.();}
   };
  }
- const get=id=>{if(!nodes.has(id))nodes.set(id,element());return nodes.get(id)};
+ const get=id=>{if(!nodes.has(id)){const node=element();if(["resume-choice","waiting-room","connection-hint","taunt-bubble","toast"].includes(id))node.classList.add("hidden");nodes.set(id,node);}return nodes.get(id)};
  class FakePeer{
   constructor(){peerCount++;this.listeners=new Map();this.destroyed=false;this.disconnected=false;}
   on(type,callback){this.listeners.set(type,callback);return this;}
