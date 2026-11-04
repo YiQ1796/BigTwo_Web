@@ -387,7 +387,32 @@ function guestJoin(saved){
  startGuestConnection();
 }
 function showGame(){$("lobby").style.display="none";$("game").style.display="block";$("room").textContent=state.room;$("net").textContent=host?"房主連線中":"連線中";history.replaceState(null,"",location.pathname+"?room="+state.room);store();}
-function resetView(){cancelGuestRecovery();clearTimeout(hostReconnectTimer);hostAttemptId++;try{hostRelay?.close();}catch{}hostRelay=null;closeGuestTransport();if(tauntTimer)clearTimeout(tauntTimer);lastTauntSentAt=0;$("taunt-bubble").classList.add("hidden");$("taunt-bubble").dataset.signature="";$("game").style.display="none";$("lobby").style.display="block";history.replaceState(null,"",location.pathname);$("net").textContent="尚未連線";connectionHint("");host=false;game=null;selected.clear();localStorage.removeItem(resumeKey);}
+function resetView(){
+ cancelGuestRecovery();
+ clearTimeout(hostReconnectTimer);
+ hostAttemptId++;
+ // Disconnect every guest before clearing the old room; otherwise the previous
+ // room can remain reachable after the host chooses to start over.
+ const oldConnections=[...peers.values()];
+ peers.clear();
+ for(const connection of oldConnections)try{connection.close();}catch{}
+ try{hostRelay?.close();}catch{}
+ hostRelay=null;
+ closeGuestTransport();
+ if(tauntTimer)clearTimeout(tauntTimer);
+ lastTauntSentAt=0;
+ $("taunt-bubble").classList.add("hidden");
+ $("taunt-bubble").dataset.signature="";
+ $("game").style.display="none";
+ $("game").classList.remove("waiting-room-active");
+ $("lobby").style.display="block";
+ history.replaceState(null,"",location.pathname);
+ $("net").textContent="尚未連線";
+ connectionHint("");
+ host=false;game=null;selected.clear();
+ state.room="";state.token="";
+ localStorage.removeItem(resumeKey);
+}
 function cardNode(id,interactive){const el=document.createElement(interactive?"button":"span");const s=id.slice(-1),r=id.slice(0,-1);el.className="card"+(s==="D"||s==="H"?" red":"")+(selected.has(id)&&interactive?" selected":"");if(interactive){el.type="button";el.setAttribute("aria-label",r+SYM[s]);el.onclick=()=>{selected.has(id)?selected.delete(id):selected.add(id);el.classList.toggle("selected",selected.has(id));$("play").textContent="出牌（"+selected.size+"）";};}
  const config=window.BIG_TWO_CARD_IMAGES||{};if(config[id]){const img=document.createElement("img");img.src=config[id];img.alt=r+SYM[s];img.onerror=()=>{el.replaceChildren();const txt=document.createElement("span");txt.textContent=r+SYM[s];el.append(txt);};el.append(img);}else{const n=document.createElement("span");n.textContent=r;const icon=document.createElement("strong");icon.textContent=SYM[s];el.append(n,icon);}return el;}
 
