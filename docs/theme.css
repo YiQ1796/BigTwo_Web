@@ -209,3 +209,121 @@ body{background:radial-gradient(ellipse at 50% -20%,#c29165 0%,#85583b 29%,#4e30
  .taunt-message-bar .taunt-bubble{font-size:12px}
  .taunt-message-idle{font-size:10px}
 }
+
+
+/* V0.6.1 — mobile-first compact card arena.  Keep existing card artwork. */
+.opponents-bar{
+ display:grid;grid-template-columns:repeat(3,minmax(0,1fr));
+ gap:9px;align-items:stretch;margin:8px 0 10px;
+}
+.opponents-bar .seat,.opponents-bar .seat.top,.opponents-bar .seat.left,.opponents-bar .seat.right{
+ position:static;left:auto;right:auto;top:auto;bottom:auto;
+ transform:none;max-width:none;min-width:0;min-height:48px;
+ display:flex;align-items:center;gap:7px;
+ padding:7px 10px;
+ border-radius:13px;background:linear-gradient(135deg,#6c4030,#503029);
+ text-align:left;white-space:nowrap;overflow:hidden;
+ font-size:13px;line-height:1.2;
+}
+.opponents-bar .seat:before{display:none}
+.seat-icon{flex:0 0 auto;font-size:17px}
+.seat-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:700}
+.seat-count{flex:0 0 auto;white-space:nowrap;color:#ffe0a2;font-size:13px;font-weight:900}
+.opponents-bar .seat.active{
+ border-color:#ffde8f;background:linear-gradient(135deg,#a46a42,#7a4a34);
+ box-shadow:0 0 0 2px #ffce7744,0 3px 14px #0005;
+}
+.opponents-bar .seat.active .seat-name{color:#fff4d2}
+.opponents-bar .seat.offline{opacity:.67;border-style:dashed}
+.table{
+ height:clamp(270px,29vw,350px);border:7px solid #a46e48;
+ border-radius:22px;margin:2px auto 10px;
+ background:linear-gradient(145deg,#c58e5e 0%,#a56f47 49%,#8b543b 100%);
+ box-shadow:inset 0 0 0 2px #ebc28c,inset 0 0 34px #5e3324a0,0 10px 22px #0007;
+ overflow:hidden;
+}
+.table:before{inset:11px;border-radius:13px;border:1px solid #ffe2aa55}
+.table:after{display:none}
+.table .middle,.middle{
+ position:absolute;inset:12px 12px 65px;z-index:4;
+ display:flex;flex-direction:column;justify-content:center;align-items:center;
+ text-align:center;pointer-events:none;
+}
+.middle #turn{font-size:15px;color:#fff6df;text-shadow:0 2px 5px #603624;margin:0 0 4px}
+.trick{
+ min-height:0;width:100%;display:flex;align-items:center;justify-content:center;
+ flex-wrap:nowrap;gap:6px;overflow:visible;
+}
+.trick .card{
+ width:clamp(65px,8vw,106px);flex:0 0 clamp(65px,8vw,106px);
+ max-width:20%;height:auto;margin:0;
+ aspect-ratio:1060/1484;box-shadow:0 6px 14px #3d2019a0;border-radius:7px;
+}
+.trick .card img{border-radius:6px}
+.middle #last{margin-top:5px;min-height:18px;font-size:13px;color:#fff2ce}
+.pile-wrap{
+ width:90%;max-width:850px;height:61px;left:50%;bottom:8px;
+ z-index:2;
+}
+.table-pile{inset:0 0 15px}
+.pile-hand .card{width:26px;flex-basis:26px;margin-left:-13px}
+.pile-caption{font-size:11px;color:#fff2d5;text-shadow:0 2px 5px #49281f}
+.room-actions{gap:7px;justify-content:center;align-items:center}
+.room-identity{display:inline-flex;align-items:center;justify-content:center;gap:7px;white-space:nowrap;color:#f8e8cb;font-size:14px}
+.room-actions .button{min-width:0}
+@media(max-width:800px){
+ .room-actions{
+  display:grid;grid-template-columns:repeat(6,minmax(0,1fr));
+  gap:6px;margin:3px auto;padding:2px 0;
+ }
+ .room-actions .room-identity{grid-column:span 4;order:0;justify-content:flex-start;padding-left:8px;min-height:29px}
+ .room-actions #round{grid-column:span 2;order:1;text-align:center;min-height:29px;display:grid;place-items:center}
+ .room-actions #share,.room-actions #stats-open,.room-actions #leave{
+  grid-column:span 2;min-width:0;width:100%;min-height:34px;
+  padding:5px 3px;justify-content:center;font-size:clamp(11px,2.8vw,13px);
+ }
+ .room-actions #share{order:2}
+ .room-actions #stats-open{order:3;display:inline-flex;align-items:center}
+ .room-actions #leave{order:4}
+ .notice{margin:1px 0 3px;min-height:17px;font-size:12px}
+ .opponents-bar{gap:5px;margin:5px 0}
+ .opponents-bar .seat,.opponents-bar .seat.top,.opponents-bar .seat.left,.opponents-bar .seat.right{
+  min-height:35px;padding:5px 7px;gap:4px;border-radius:10px;
+ }
+ .seat-icon{font-size:13px}
+ .seat-name{font-size:11px}
+ .seat-count{font-size:11px}
+ .table{height:250px;border-width:5px;border-radius:17px;margin:0 auto 7px}
+ .table:before{inset:7px;border-radius:10px}
+ .table .middle,.middle{inset:11px 4px 50px}
+ .middle #turn{font-size:13px}
+ .trick{gap:3px}
+ .trick .card{
+  width:clamp(44px,16.5vw,72px);flex:0 0 clamp(44px,16.5vw,72px);
+  max-width:19.5%;
+ }
+ .middle #last{font-size:11px}
+ .pile-wrap{width:93%;height:45px;bottom:5px}
+ .table-pile{bottom:13px}
+ .pile-hand .card{width:20px;flex-basis:20px;margin-left:-10px}
+ .pile-caption{font-size:9px}
+ .handinfo{font-size:13px;margin:3px 0 0}
+ .taunt-message-bar{margin-bottom:5px}
+}
+@media(max-width:420px){
+ .room-identity{font-size:12px}.room{font-size:14px;letter-spacing:1.1px}
+ .opponents-bar .seat,.opponents-bar .seat.top,.opponents-bar .seat.left,.opponents-bar .seat.right{padding:5px 4px}
+ .seat-icon{font-size:12px}.seat-name{font-size:10px}.seat-count{font-size:10px}
+ .table{height:237px}
+ .table .middle,.middle{inset:9px 3px 47px}
+ .trick .card{width:clamp(42px,16vw,66px);flex-basis:clamp(42px,16vw,66px)}
+ .pile-wrap{height:42px}
+}
+@media(orientation:landscape) and (max-height:500px){
+ .opponents-bar{margin:2px 0;gap:5px}
+ .opponents-bar .seat,.opponents-bar .seat.top,.opponents-bar .seat.left,.opponents-bar .seat.right{min-height:28px;padding:3px 6px}
+ .table{height:200px;border-width:4px}
+ .table .middle,.middle{inset:5px 5px 39px}
+ .trick .card{width:clamp(48px,8vw,83px);flex-basis:clamp(48px,8vw,83px)}
+ .pile-wrap{height:34px;bottom:2px}
+}
