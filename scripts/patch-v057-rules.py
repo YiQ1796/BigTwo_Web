@@ -18,10 +18,13 @@ if(a.type===\"four\")return true;
 if(b.type===\"four\")return false;
 if(a.size!==b.size)return false;if(a.size===5&&a.level!==b.level)return a.level>b.level;for(let i=0;i<a.key.length;i++){if(a.key[i]!==b.key[i])return a.key[i]>b.key[i];}return false;}"""
 
-if old in text:
+if "const STRAIGHT_ORDER=" in text and "function compareKeys(" in text:
+    # Modern builds hold the canonical rules directly in docs/index.html.
+    print("Canonical rules present; legacy patch skipped")
+elif old in text:
     text = text.replace(old, new, 1)
 elif new not in text:
-    raise SystemExit("Expected V0.5.6 compare() implementation was not found")
+    raise SystemExit("Expected compare() implementation was not found")
 
 text = text.replace("猴王金典牌組 · 好友連線 · v0.5.6", "猴王金典牌組 · 好友連線 · v0.5.7", 1)
 text = text.replace("relay-transport.js?v=056", "relay-transport.js?v=057", 1)
