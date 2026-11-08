@@ -10,7 +10,7 @@ const css=fs.readFileSync("docs/theme.css","utf8");
 // The table clips descendants; it must never clip or obscure taunt messages.
 const playStart=html.indexOf('<div class="play-column">');
 const bannerStart=html.indexOf('<div class="taunt-message-bar"',playStart);
-const tableStart=html.indexOf('<div class="table">',playStart);
+const tableStart=html.indexOf('<div class="table"',playStart);
 assert(playStart>=0&&bannerStart>playStart&&tableStart>bannerStart,
  "Taunt message strip must precede the table within the play column");
 assert.equal((html.match(/id="taunt-bubble"/g)||[]).length,1);
