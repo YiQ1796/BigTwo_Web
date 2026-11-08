@@ -51,6 +51,7 @@ const STRAIGHT_ORDER=[
 const $=id=>document.getElementById(id);
 let host=false,game=null,seat=0,peer=null,conn=null,peers=new Map(),selected=new Set(),resumeKey="bigtwo-online-v04",resuming=false,thinking=false,tauntTimer=null,lastTauntSentAt=0;
 let guestAttemptId=0,guestAttemptFailed=0,guestRetryCount=0,guestRetryTimer=null,guestHandshakeTimer=null,guestHasState=false,hostReconnectTimer=null,hostAttemptId=0,hostRelay=null,guestRelay=null;
+let wssUnavailableUntil=0;
 const TAUNT_TEXT=Object.freeze({"1":"🐒 猴王駕到！","2":"😏 這手你敢接？","3":"🃏 輪到你囉！","4":"😂 別緊張啦！","5":"⌛ 是要等多久？","6":"📣 要出牌了！","7":"👴 等到我都老三歲了！","8":"🐢 你的牌在散步嗎？","9":"😴 我都快睡著了！","10":"🤭 這手還要想多久？","11":"🔥 快點，我要贏了！","12":"🙈 別再 PASS 啦！"});
 const TAUNT_COOLDOWN_MS=6000;
 const state={room:"",token:"",name:""};
@@ -136,7 +137,17 @@ function newRoom(code,name,token){return{room:code,players:[{name,token,ai:false
 function log(s){game.log.unshift(s);game.log=game.log.slice(0,80);}
 function snapshot(n){return{room:game.room,phase:game.phase,round:game.round,first:game.first,turn:game.turn,trick:game.trick,lastSeat:game.lastSeat,champion:game.champion,me:n,hand:game.players[n]?.hand||[],players:game.players.map((p,i)=>({name:p.name,ai:p.ai,count:p.hand.length,online:p.ai?true:(i===0||!!peers.get(i)?.open)})),playedCards:game.playedCards||[],playedHands:game.playedHands||[],taunt:game.taunt||null,log:game.log};}
 function broadcast(){if(!host||!game)return;store();render(snapshot(0));for(const [n,c] of peers){if(c.open)try{c.send({type:"state",state:snapshot(n)});}catch(e){console.warn(e);}}}
-function ensureGame(){if(!game||game.phase!=="lobby")throw Error("此房間無法現在開始");}
+function ensureGame(){
+ if(!game||!["lobby","finished"].includes(game.phase))throw Error("此房間無法現在開始");
+ // Never start a later round with a disconnected human. Their reserved seat
+ // must rejoin under the original token instead of silently becoming an AI.
+ if(game.round>0){
+  const offline=game.players.slice(1).filter((player,index)=>
+   !player.ai&&!peers.get(index+1)?.open
+  );
+  if(offline.length)throw Error("請先等待真人玩家重新連線："+offline.map(p=>p.name).join("、"));
+ }
+}
 function startRound(){
  ensureGame();while(game.players.length<4)game.players.push({name:"電腦 "+game.players.length,ai:true,token:null,hand:[]});
  const d=shuffle(deck());game.players.forEach((p,i)=>p.hand=sorted(d.slice(i*13,i*13+13)));
@@ -275,7 +286,7 @@ async function startGuestConnection(){
  $("net").textContent="正在連線到房主";
  connectionHint("優先嘗試 WSS 加密中繼加入房間 "+state.room+"（第 "+guestRetryCount+"/6 次）…",true);
  // Unlike ICE direct negotiation, encrypted WSS can work behind many restrictive NATs.
- if(window.BigTwoRelay?.connectGuest){
+ if(window.BigTwoRelay?.connectGuest&&Date.now()>=wssUnavailableUntil){
   try{
    const relay=await window.BigTwoRelay.connectGuest(state.room,{
     name:state.name,token:state.token,
@@ -288,7 +299,9 @@ async function startGuestConnection(){
    guestRelay=relay;conn=relay;return;
   }catch(error){
    if(attempt!==guestAttemptId||host||guestAttemptFailed===attempt)return;
-   connectionHint("WSS 中繼不可用，改用 P2P 連線：" + String(error?.message||"未知錯誤").slice(0,85),true);
+   // Avoid waiting for the same unresponsive public broker on every retry.
+   wssUnavailableUntil=Date.now()+120000;
+   connectionHint("WSS 暫時無法使用，改試 P2P 直連；會保留你的原座位。",true);
   }
  }
  try{
@@ -329,7 +342,17 @@ async function startGuestConnection(){
 function retryConnection(){
  if(host){
   if(!game||!state.room)return;
-  hostCreate({room:state.room,token:state.token,name:state.name,game});
+  // Do not tear down working guest channels merely to retry host signalling.
+  if(hostRelay||peer&&!peer.destroyed&&!peer.disconnected){
+   broadcast();
+   connectionHint("");
+   msg("房間仍在線，已同步連線玩家");
+  }else if(peer&&!peer.destroyed&&peer.disconnected){
+   try{peer.reconnect();}catch{}
+   connectionHint("已重新嘗試連線，現有座位會保留。",true);
+  }else{
+   hostCreate({room:state.room,token:state.token,name:state.name,game});
+  }
   return;
  }
  if(!state.room){connectionHint("請先輸入房號並加入房間。");return;}
@@ -380,6 +403,9 @@ async function hostCreate(saved){
  closeGuestTransport();
  try{hostRelay?.close();}catch{}
  hostRelay=null;host=true;
+ // A fresh room has no existing guests; a recovered room reserves its human
+ // seats and allows them to reconnect using the original room credentials.
+ peers.clear();
  if(saved){game=saved.game;state.room=saved.room;state.token=saved.token;state.name=saved.name;}
  else{
   state.room=randomCode();state.token=randomToken();
@@ -416,7 +442,7 @@ async function hostCreate(saved){
   // Open the table as soon as either transport is available; keep the other running.
   const chosen=await Promise.any(attempts);
   if(attempt!==hostAttemptId||game!==currentGame)return;
-  peers.clear();seat=0;showGame();broadcast();
+  seat=0;showGame();broadcast();
   $("net").textContent="房主連線中（"+chosen+"）";
   connectionHint("");
  }catch(err){
@@ -610,13 +636,16 @@ $("result-stay").onclick=()=>{dismissedResultKey=displayedResultKey;$("result-ov
 $("result-home").onclick=()=>{dismissedResultKey=displayedResultKey;$("result-overlay").classList.add("hidden");resetView();};
 $("result-next").onclick=()=>{
  if(!host||game?.phase!=="finished")return;
- dismissedResultKey=displayedResultKey;
- $("result-overlay").classList.add("hidden");
- $("start").click();
+ try{
+  // Keep the result dialog visible if a friend still needs to reconnect.
+  // startRound() broadcasts the new deal to every connected real player.
+  startRound();
+  dismissedResultKey=displayedResultKey;
+ }catch(error){msg(error.message);}
 };
 $("create").onclick=()=>{hostCreate(null);};
 $("join").onclick=()=>guestJoin(null);
-$("start").onclick=()=>{try{if(game.phase==="finished"){game.phase="lobby";}startRound();}catch(e){msg(e.message);}};
+$("start").onclick=()=>{try{startRound();}catch(e){msg(e.message);}};
 $("play").onclick=()=>{if(!selected.size){msg("請先選牌");return;}try{if(host)play(0,Array.from(selected));else guestSend("play",{cards:Array.from(selected)});selected.clear();if(host)render(snapshot(0));}catch(e){msg(e.message);}};
 $("pass").onclick=()=>{try{if(host)pass(0);else guestSend("pass");}catch(e){msg(e.message);}};
 $("clear").onclick=()=>{selected.clear();if(host)render(snapshot(0));else{for(const e of $("hand").children)e.classList.remove("selected");$("play").textContent="出牌（0）";}};
