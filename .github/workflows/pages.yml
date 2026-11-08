@@ -34,6 +34,7 @@ jobs:
           node tests/straight-v059.test.cjs
           node tests/monkey-theme-taunt-v060.test.cjs
           node tests/multiplayer-next-round-v061.test.cjs
+          node tests/strict-types-v062.test.cjs
           node tests/rules-room-taunt-v053.test.cjs
           node tests/iron-taunts-v054.test.cjs
           node tests/network-recovery-v055.test.cjs
