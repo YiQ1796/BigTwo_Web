@@ -9,7 +9,7 @@
 <script defer src="https://cdn.jsdelivr.net/npm/peerjs@1.5.5/dist/peerjs.min.js" integrity="sha512-XEKeWX+mI3Ov+tg2evDlVQFzVOIp4T8J3cNcCEPaEUGpxJV3eZaN8rHuvnFPvQpGJBHPmrozJDMpm2xcDvtmyQ==" crossorigin="anonymous"></script>
 <link rel="stylesheet" href="./theme.css?v=061">
 </head><body><div class="shell">
-<header class="bar"><div><h1>♠ 大老二 <small>BIG TWO</small></h1><small>猴三毛暖棕牌桌 · 好友連線 · v0.6.1</small></div><div id="net" class="tag">尚未連線</div></header>
+<header class="bar"><div><h1>♠ 大老二 <small>BIG TWO</small></h1><small>猴三毛暖棕牌桌 · 好友連線 · v0.6.2</small></div><div id="net" class="tag">尚未連線</div></header>
 <div id="connection-hint" class="connection-hint hidden" role="status" aria-live="polite"><span id="connection-description"></span><button type="button" id="retry-connect" class="button sub">重新連線</button></div>
 <section id="lobby" class="panel"><section id="resume-choice" class="resume-choice hidden" role="region" aria-label="恢復遊戲選擇"><span class="resume-kicker">♠ 歡迎回來</span><h2>要繼續上一局嗎？</h2><p id="resume-summary">找到上次的房間紀錄</p><div class="resume-buttons"><button id="resume-continue" type="button" class="button">↩ 返回上一局</button><button id="resume-new" type="button" class="button alt">✦ 重新開始</button></div><small>不會自動連回舊牌桌。恢復連線需要原房主仍在線；重新開始會清除本機的舊房間紀錄。</small></section><div id="entry-form"><div class="lobby-showcase"><img src="./assets/cards/KS.webp" alt="猴王金典撲克牌" width="75" height="105"><div><strong>猴王金典 · 大老二</strong><small>52 張正式撲克牌已套用，好友連線、AI 補位，手機與電腦都能玩。</small></div></div><h2>建立房間或加入好友</h2><p>固定四人，房主開始後不足的座位自動補 AI。房主必須保持頁面開啟。</p><label>你的暱稱<input id="nick" maxlength="16" placeholder="輸入暱稱" autocomplete="nickname"></label><button class="button" id="create">建立新房間</button><hr style="margin:22px 0;border-color:#4b7768"><label>六位數字房號<input id="code" maxlength="6" inputmode="numeric" autocomplete="off" placeholder="例如 268519"></label><button class="button alt" id="join">加入好友房間</button><p class="legend">使用瀏覽器 P2P 連線。部分公司網路或特殊 NAT 可能無法直連。</p></div></section>
 <section id="game"><div class="actions room-actions"><span class="room-identity">房號 <b class="room" id="room">------</b></span><button id="share" class="button sub">複製邀請網址</button><span id="round" class="badge">等待開局</span><button id="stats-open" class="button sub stats-mobile-toggle" type="button" aria-controls="stats-panel" aria-expanded="false">出牌統計</button><button id="leave" class="button sub">返回大廳</button></div><p id="notice" class="notice"></p><section id="waiting-room" class="waiting-room hidden" aria-label="等待玩家加入"><div class="waiting-hero"><span class="waiting-eyebrow"><span class="waiting-dot" aria-hidden="true"></span> FRIENDS LOBBY · 好友等待室</span><h2>等待好友入座</h2><p>邀請好友加入，四人到齊就能開局，也可由房主選擇讓電腦補位。</p><div class="waiting-count" id="waiting-count" aria-live="polite">真人已連線 1 / 4</div><div class="waiting-progress" aria-hidden="true"><div id="waiting-meter"></div></div></div><div id="waiting-slots" class="waiting-slots" aria-live="polite"></div><div class="waiting-bottom"><p id="waiting-hint">把房號或邀請連結傳給朋友，一起入座。</p><div class="waiting-commands"><button type="button" class="button alt" id="waiting-invite">複製邀請連結</button><button type="button" class="button" id="waiting-start">開始遊戲（AI 補位）</button></div></div></section><div class="table-layout"><div class="play-column"><div class="taunt-message-bar" aria-label="對局嘲諷訊息"><span class="taunt-message-icon" aria-hidden="true">🐒</span><div class="taunt-message-body"><span class="taunt-message-label">對局嘲諷</span><span id="taunt-idle" class="taunt-message-idle">玩家的嘲諷訊息會顯示在這裡</span><span id="taunt-bubble" class="taunt-bubble hidden" role="status" aria-live="polite"></span></div></div><div class="opponents-bar" aria-label="其他玩家狀態"><div class="seat top" id="seat1"></div><div class="seat left" id="seat2"></div><div class="seat right" id="seat3"></div></div><div class="table" aria-label="中央出牌區"><div class="pile-wrap"><div id="pile-count" class="pile-caption">已出牌將堆疊於此</div><div id="table-pile" class="table-pile" aria-label="本局已出牌堆疊"></div></div><div class="middle"><div id="turn">等待玩家</div><div id="trick" class="trick"></div><div id="last" class="tabletext"></div></div></div><div class="handinfo" id="me">你的手牌</div><div class="hand" id="hand"></div><div class="actions"><button class="button sub" id="clear">取消選牌</button><button class="button alt" id="pass">PASS</button><button class="button" id="play">出牌</button><button class="button" id="start" style="display:none">開始遊戲（AI 補位）</button></div><div class="taunt-toolbar" role="group" aria-label="對局嘲諷快捷按鈕"><button type="button" id="taunt-1" class="taunt-button">🐒 猴王駕到</button><button type="button" id="taunt-2" class="taunt-button">😏 這手敢接？</button><button type="button" id="taunt-3" class="taunt-button">🃏 輪到你囉</button><button type="button" id="taunt-4" class="taunt-button">😂 別緊張</button><button type="button" id="taunt-5" class="taunt-button">⌛ 是要等多久？</button><button type="button" id="taunt-6" class="taunt-button">📣 要出牌了！</button><button type="button" id="taunt-7" class="taunt-button">👴 等到我都老三歲</button><button type="button" id="taunt-8" class="taunt-button">🐢 你的牌在散步？</button><button type="button" id="taunt-9" class="taunt-button">😴 我都快睡著了</button><button type="button" id="taunt-10" class="taunt-button">🤭 這手還要想？</button><button type="button" id="taunt-11" class="taunt-button">🔥 快點，我要贏了</button><button type="button" id="taunt-12" class="taunt-button">🙈 別再 PASS 啦</button></div></div><div class="sidebar">
@@ -111,9 +111,23 @@ function compare(a,b){
   if(b.type!=="four")return true;
   return compareKeys(a.key,b.key);
  }
- if(a.size!==b.size)return false;
- if(a.size===5&&a.level!==b.level)return a.level>b.level;
+ // Regular plays must match BOTH the number of cards and the hand type.
+ // A full house never beats a straight; a straight never beats a full house.
+ if(a.size!==b.size||a.type!==b.type)return false;
  return compareKeys(a.key,b.key);
+}
+// Display a played straight in its actual sequence, not single-card rank order.
+// In particular: 2-3-4-5-6 (strongest), A-2-3-4-5 (weakest).
+// Hands remain sorted by normal single-card rank; only played combinations change.
+function orderedPlayedCards(cards,pattern=classify(cards)){
+ if(pattern&&(pattern.type==="straight"||pattern.type==="sf")){
+  const sequence=STRAIGHT_ORDER[pattern.key[0]];
+  if(sequence){
+   const byRank=new Map(cards.map(card=>[card.slice(0,-1),card]));
+   if(sequence.every(label=>byRank.has(label)))return sequence.map(label=>byRank.get(label));
+  }
+ }
+ return sorted(cards);
 }
 function dragon(cards){return cards.length===13&&new Set(cards.map(rank)).size===13;}
 function deck(){return R.flatMap(r=>S.map(s=>r+s));}
@@ -165,7 +179,11 @@ function play(n,ids){
  const t=classify(ids);if(!t)throw Error("不是有效牌型");
  if(game.first&&!ids.includes("3C"))throw Error("第一手牌必須包含梅花 3");
  if(game.trick&&!compare(t,game.trick.pattern))throw Error("牌型或大小不足，無法壓牌");
- (game.playedCards ||= []).push(...ids);(game.playedHands ||= []).push({player:n,cards:sorted(ids)});p.hand=p.hand.filter(x=>!ids.includes(x));game.trick={cards:sorted(ids),pattern:t,player:n};game.lastSeat=n;game.passes=0;game.first=false;log(p.name+" 出 "+NAMES[t.type]+"（"+ids.length+" 張）");
+ const displayed=orderedPlayedCards(ids,t);
+ (game.playedCards ||= []).push(...ids);
+ (game.playedHands ||= []).push({player:n,cards:displayed});
+ p.hand=p.hand.filter(x=>!ids.includes(x));
+ game.trick={cards:displayed,pattern:t,player:n};game.lastSeat=n;game.passes=0;game.first=false;log(p.name+" 出 "+NAMES[t.type]+"（"+ids.length+" 張）");
  if(p.hand.length===0){game.phase="finished";game.champion=n;game.winnerSeat=n;log(p.name+" 獲勝！");}
  else game.turn=(n+1)%4;
  broadcast();runAi();
@@ -530,7 +548,7 @@ function renderStats(st){
 function renderTablePile(st){
  const hands=Array.isArray(st.playedHands)?st.playedHands:[];
  const older=st.trick?hands.slice(0,-1):hands,recent=older.slice(-8),pile=$("table-pile");
- const signature=st.round+":"+recent.map(h=>h.player+"="+h.cards.join(",")).join("|");
+ const signature=st.round+":"+recent.map(h=>h.player+"="+orderedPlayedCards(h.cards).join(",")).join("|");
  if(pile.dataset.signature!==signature){
   const fragment=document.createDocumentFragment();
   recent.forEach((hand,index)=>{
@@ -538,8 +556,9 @@ function renderTablePile(st){
    stack.style.left=(3+index*11)+"%";stack.style.bottom=((index%3)*3)+"px";
    stack.style.transform="rotate("+((index%5-2)*4)+"deg)";
    stack.style.zIndex=String(index+1);
-   stack.setAttribute("aria-label",(st.players[hand.player]?.name||"玩家")+" 已出 "+hand.cards.join("、"));
-   hand.cards.slice(0,5).forEach(id=>stack.append(cardNode(id,false)));
+   const displayed=orderedPlayedCards(hand.cards);
+   stack.setAttribute("aria-label",(st.players[hand.player]?.name||"玩家")+" 已出 "+displayed.join("、"));
+   displayed.slice(0,5).forEach(id=>stack.append(cardNode(id,false)));
    fragment.append(stack);
   });
   pile.replaceChildren(fragment);pile.dataset.signature=signature;
@@ -547,7 +566,7 @@ function renderTablePile(st){
  $("pile-count").textContent=hands.length?"已出 "+hands.length+" 手 · 桌面保留最近 "+recent.length+" 手":"已出牌將堆疊於此";
 }
 function renderCurrentTrick(st){
- const cards=st.trick?.cards||[],view=$("trick"),signature=st.round+":"+cards.join("|");
+ const cards=orderedPlayedCards(st.trick?.cards||[],st.trick?.pattern),view=$("trick"),signature=st.round+":"+cards.join("|");
  if(view.dataset.signature!==signature){view.replaceChildren(...cards.map(c=>cardNode(c,false)));view.dataset.signature=signature;}
 }
 function renderTaunt(st){
