@@ -132,6 +132,36 @@ test("regular straight still cannot be played over a pair",()=>{
  const pair=rules.classify(["KC","KS"]);
  assert(!rules.compare(highest,pair));
 });
+test("standalone three-of-a-kind is invalid and full house requires exactly 3+2",()=>{
+ assert.equal(rules.classify(["7C","7D","7H"]),null);
+ assert.equal(rules.classify(["7C","7D","7H","9C","10C"]),null);
+ assert.equal(rules.classify(["7C","7D","8C","8D","10H"]),null);
+ const full=rules.classify(["7C","7D","7H","9C","9D"]);
+ assert(full&&full.type==="full");
+ const iron=rules.classify(["7C","7D","7H","7S","9D"]);
+ assert(iron&&iron.type==="four");
+});
+test("five same-suit cards are valid ONLY when they form a listed straight flush",()=>{
+ assert.equal(rules.classify(["3H","5H","7H","9H","JH"]),null);
+ assert.equal(rules.classify(["2C","4C","6C","8C","10C"]),null);
+ assert.equal(rules.classify(["2S","3S","4S","5S","6S"]).type,"sf");
+ assert.equal(rules.classify(["AS","2S","3S","4S","5S"]).type,"sf");
+ // AI gets the same legal-move constraints as players.
+ const hand=["3H","5H","7H","9H","JH"];
+ assert(!rules.options(hand).some(move=>move.cards.length===5));
+ assert(!rules.options(["7C","7D","7H"]).some(move=>move.cards.length===3));
+});
+test("engine rejects standalone triples and non-consecutive flushes",()=>{
+ const g=rules.newRoom("123456","Player","token");
+ g.players=[
+  {name:"Player",ai:false,hand:["3H","5H","7H","9H","JH","7C","7D","7S"]},
+  {name:"Bot1",ai:true,hand:[]},{name:"Bot2",ai:true,hand:[]},{name:"Bot3",ai:true,hand:[]}
+ ];
+ g.phase="playing";g.first=false;g.turn=0;rules.setGame(g);
+ assert.throws(()=>rules.play(0,["3H","5H","7H","9H","JH"]),/不是有效牌型/);
+ assert.throws(()=>rules.play(0,["7H","7C","7D"]),/不是有效牌型/);
+ assert.equal(g.players[0].hand.length,8);
+});
 test("AI legal move generator recognizes both special straights",()=>{
  const hand=["2S","3C","4D","5H","6C","7D","8H"];
  const candidates=rules.options(hand);
