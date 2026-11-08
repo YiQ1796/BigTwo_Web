@@ -620,7 +620,23 @@ function render(st){
  const me=st.me;const p=st.players;
  renderWaitingRoom(st);
  renderResult(st);
- for(let offset=1;offset<=3;offset++){const idx=(me+offset)%4,el=$("seat"+offset),a=p[idx];el.textContent=a?((a.ai?"🤖 ":"👤 ")+a.name+" · "+a.count+" 張"+(st.phase==="playing"&&st.turn===idx?" ◀":"")):"＋ 等待加入";el.title=a?(a.ai?"電腦玩家":"真人玩家")+(a.online===false?"，暫時離線":"")+" · "+a.name:"等待玩家加入";el.classList.toggle("active",st.phase==="playing"&&idx===st.turn);el.classList.toggle("offline",!!a&&!a.ai&&a.online===false);}
+ for(let offset=1;offset<=3;offset++){
+  const idx=(me+offset)%4,el=$("seat"+offset),player=p[idx];
+  const playerIcon=document.createElement("span");
+  playerIcon.className="seat-icon";
+  playerIcon.textContent=!player?"＋":player.ai?"🤖":"👤";
+  const playerName=document.createElement("span");
+  playerName.className="seat-name";
+  playerName.textContent=player?.name||"等待加入";
+  const remaining=document.createElement("strong");
+  remaining.className="seat-count";
+  remaining.textContent=player?player.count+"張":"空位";
+  el.replaceChildren(playerIcon,playerName,remaining);
+  el.title=player?(player.ai?"電腦玩家":"真人玩家")+
+    (player.online===false?"，暫時離線":"")+" · "+player.name:"等待玩家加入";
+  el.classList.toggle("active",st.phase==="playing"&&idx===st.turn);
+  el.classList.toggle("offline",!!player&&!player.ai&&player.online===false);
+ }
  $("me").textContent=p[me]?.name+" · "+st.hand.length+" 張"+(st.phase==="playing"&&st.turn===me?" · 輪到你":"");
  $("notice").textContent=st.phase==="lobby"?"等待真人加入，房主可以按開始讓 AI 補足四席":st.phase==="finished"?(p[st.champion].name+" 獲勝！"):(st.turn===me?"輪到你出牌":("等待 "+p[st.turn].name+" 出牌"));
  $("turn").textContent=st.phase==="playing"?(p[st.turn].name+" 的回合"):(st.phase==="finished"?"🏆 本局結束":"等待開局");
